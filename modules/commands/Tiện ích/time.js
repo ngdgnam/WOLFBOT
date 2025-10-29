@@ -5,9 +5,13 @@ module.exports.config = {
   credits: "joshua sy rework by Spiritエーアイ",
   description: "xem thời gian của các nước",
   commandCategory: "Tiện ích",
-  cooldowns: 2};
-    module.exports.run = async ({ api, event }) => {
-    const moment = require("moment-timezone");
+  cooldowns: 2,
+};
+
+
+module.exports.run = async ({ api, event }) => {
+
+  const moment = require("moment-timezone");
   const day = moment.tz("Asia/Ho_Chi_Minh").format("DD/MM/YYYY");
   var thu = moment.tz('Asia/Ho_Chi_Minh').format('dddd');
   if (thu == 'Sunday') thu = 'Chủ Nhật'
@@ -17,7 +21,8 @@ module.exports.config = {
   if (thu == "Thursday") thu = 'Thứ Năm'
   if (thu == 'Friday') thu = 'Thứ Sáu'
   if (thu == 'Saturday') thu = 'Thứ Bảy'
-    const gio = moment.tz("Asia/Ho_Chi_Minh").format("h:mm:ss - A");
+
+  const gio = moment.tz("Asia/Ho_Chi_Minh").format("h:mm:ss - A");
   const gio2 = moment.tz("Europe/London").format("h:mm:ss - A");
   const gio1 = moment.tz("America/Brasilia").format("h:mm:ss - A");
   const gio3 = moment.tz("Asia/Seoul").format("h:mm:ss - A");
@@ -30,6 +35,8 @@ module.exports.config = {
   const gio10 = moment.tz("Asia/Kolkata").format("h:mm:ss - A");
   const gio11 = moment.tz("Asia/Hong_Kong").format("h:mm:ss - A");
   const gio12 = moment.tz("America/Mexico_City").format("h:mm:ss - A");
-    const message = `📆 Ngày: ${day} (${thu})\n\n🇻🇳 Vietnam: ${gio}\n🇵🇭 Philippines: ${gio8}\n🇬🇧 London: ${gio2}\n🇺🇸 New York: ${gio5}\n🇰🇷 Seoul: ${gio3}\n🇯🇵 Tokyo: ${gio4}\n🇧🇷 Brasilia: ${gio1}\n🇲🇾 Kuala Lumpur: ${gio6}\n🇫🇷 Paris: ${gio7}\n🇹🇭 Thailand: ${gio9}\n🇮🇳 Ấn Độ: ${gio10}\n🇭🇰 Hong Kong: ${gio11}\n🇲🇽 Mexico City: ${gio12}`;
-    api.sendMessage(message, event.threadID);
+
+  const message = `📆 Ngày: ${day} (${thu})\n\n🇻🇳 Vietnam: ${gio}\n🇵🇭 Philippines: ${gio8}\n🇬🇧 London: ${gio2}\n🇺🇸 New York: ${gio5}\n🇰🇷 Seoul: ${gio3}\n🇯🇵 Tokyo: ${gio4}\n🇧🇷 Brasilia: ${gio1}\n🇲🇾 Kuala Lumpur: ${gio6}\n🇫🇷 Paris: ${gio7}\n🇹🇭 Thailand: ${gio9}\n🇮🇳 Ấn Độ: ${gio10}\n🇭🇰 Hong Kong: ${gio11}\n🇲🇽 Mexico City: ${gio12}`;
+
+  api.sendMessage(message, event.threadID);
 };

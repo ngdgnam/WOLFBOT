@@ -14,15 +14,15 @@ module.exports.config = {
 };
 
 const { downloadFile } = require("../../../utils/index");
-module.exports.run = async function  ({ api, event, args }) {
+module.exports.run = async function ({ api, event, args }) {
 	try {
 		const { createReadStream, unlinkSync } = require("fs-extra");
 		const { resolve } = require("path")
 		var content = (event.type == "message_reply") ? event.messageReply.body : args.join(" ");
-		var languageToSay = (["ru", "en", "ko", "ja"].some(item => content.indexOf(item) == 0) ? content.slice(0, content.indexOf(" ") : global.config.language;
+		var languageToSay = (["ru", "en", "ko", "ja"].some(item => content.indexOf(item) == 0)) ? content.slice(0, content.indexOf(" ")) : global.config.language;
 		var msg = (languageToSay != global.config.language) ? content.slice(3, content.length) : content;
 		const path = resolve(__dirname, 'cache', `${event.threadID}_${event.senderID}.mp3`);
 		await downloadFile(`https://translate.google.com/translate_tts?ie=UTF-8&q=${encodeURIComponent(msg)}&tl=${languageToSay}&client=tw-ob`, path);
-		return api.sendMessage({ attachment: createReadStream(path) }, event.threadID, () => unlinkSync(path);
-	} catch ()(e) { return console.log(e) };
+		return api.sendMessage({ attachment: createReadStream(path) }, event.threadID, () => unlinkSync(path));
+	} catch (e) { return console.log(e) };
 }

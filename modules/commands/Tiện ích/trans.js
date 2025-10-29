@@ -37,13 +37,14 @@ module.exports.run = async ({ api, event, args }) => {
 			translateThis = content;
 			lang = global.config.language;
 		} else {
-			translateThis = content.slice(0, content.indexOf("->").trim();
+			translateThis = content.slice(0, content.indexOf("->")).trim();
 			lang = content.substring(content.indexOf("->") + 3).trim();
 		}
 	}
 
 	const url = `https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=${lang}&dt=t&q=${encodeURIComponent(translateThis)}`;
-    request(url, (err, response, body) => {
+	
+	request(url, (err, response, body) => {
 		if (err) {
 			return api.sendMessage("⚠️ Đã có lỗi xảy ra trong quá trình dịch.", threadID, messageID);
 		}
@@ -51,13 +52,13 @@ module.exports.run = async ({ api, event, args }) => {
 			const retrieve = JSON.parse(body);
 			let text = '';
 			retrieve[0].forEach(item => {
-    if (item[0]) {
-    text += item[0];
-    }
+				if (item[0]) {
+					text += item[0];
+				}
 			});
 			const fromLang = (retrieve[2] === retrieve[8][0][0]) ? retrieve[2] : retrieve[8][0][0];
 			api.sendMessage(`🔄 Bản dịch: \n\n${text}\n\n✏️ Dịch từ ${fromLang} sang ${lang}`, threadID, messageID);
-		} catch ()(parseError) {
+		} catch (parseError) {
 			return api.sendMessage("⚠️ Đã có lỗi xảy ra khi xử lý kết quả dịch.", threadID, messageID);
 		}
 	});

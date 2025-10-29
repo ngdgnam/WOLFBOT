@@ -14,26 +14,26 @@ module.exports.config = {
 
 const spamThreads = new Set();  
 function delay(ms) {
-  return new Promise(resolve => setTimeout(resolve, ms);
+  return new Promise(resolve => setTimeout(resolve, ms));
 }
-module.exports.run = async function  ({ api, event, args }) { 
+module.exports.run = async function ({ api, event, args }) { 
   const { threadID, messageID, senderID } = event;
   const content = (args.length != 0) ? args.join(" ") : "prefix";
   if (args[0] === "stop") {
-    if (spamThreads.has(threadID) {
-    spamThreads.delete(threadID);
-    return api.sendMessage('Đã dừng spam!', threadID, messageID);
+    if (spamThreads.has(threadID)) {
+      spamThreads.delete(threadID);
+      return api.sendMessage('Đã dừng spam!', threadID, messageID);
     } 
     return api.sendMessage('Không có quá trình spam nào đang diễn ra!', threadID, messageID);
   } 
-  if (!spamThreads.has(threadID) {
+  if (!spamThreads.has(threadID)) {
     spamThreads.add(threadID);
     api.sendMessage(`Bắt đầu spam!`, threadID, messageID);
-    while (spamThreads.has(threadID) {
-    await delay(this.config.envConfig.spamDelay * 1000);
-    if (spamThreads.has(threadID) {
-    api.sendMessage(content, threadID);
-    }
+    while (spamThreads.has(threadID)) {
+      await delay(this.config.envConfig.spamDelay * 1000);
+      if (spamThreads.has(threadID)) {
+        api.sendMessage(content, threadID);
+      }
     }
   } else {
     api.sendMessage('Đang spam rồi cut!', threadID, messageID);

@@ -9,13 +9,13 @@ module.exports.config = {
   cooldowns: 0
 };
 
-module.exports.run = async function  ({ event, args, api }) {
-  async function streamURL (url, mime = 'jpg') {
+module.exports.run = async function ({ event, args, api }) {
+  async function streamURL(url, mime = 'jpg') {
     const dest = `${__dirname}/cache/${Date.now()}.${mime}`,
-    downloader = require('image-downloader'),
-    fse = require('fs-extra');
+      downloader = require('image-downloader'),
+      fse = require('fs-extra');
     await downloader.image({
-    url, dest
+      url, dest
     });
     setTimeout(j => fse.unlinkSync(j), 60 * 1000, dest);
     return fse.createReadStream(dest);

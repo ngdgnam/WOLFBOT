@@ -7,8 +7,9 @@ module.exports.config = {
 	commandCategory: "Tiện ích",
 	usages: "tid",
 	cooldowns: 5,
-	dependencies: ''};
+	dependencies: '',
+};
 
-module.exports.run = async function  ({ api, event }) {
+module.exports.run = async function ({ api, event }) {
 	api.sendMessage(event.threadID, event.threadID);
 };

@@ -1,4 +1,4 @@
-// mirai.js - WolfBot Stable AutoFix Version (Rewritten for Robustness)
+// mirai.js - WolfBot Stable Merged Version (No AutoFix, Robust & Optimized - Fixed Models & Duplicates)
 const fs = require('fs-extra');
 const path = require('path');
 const chalk = require('chalk');
@@ -8,128 +8,21 @@ const readline = require('readline');
 const login = require('@dongdev/fca-unofficial');
 const logger = require('./utils/log.js');
 
-// === ENHANCED AUTO FIX & CLEANUP FOR COMMANDS ===
-function autoFixCommands() {
-  const commandDir = path.join(__dirname, 'modules/commands');
-
-  function fixSyntax(content) {
-    // Comprehensive regex-based fixes for common JS syntax errors
-    return content
-      // Fix await usage
-      .replace(/\bawait\s+(\w+)/g, 'await $1')
-      // Fix catch blocks
-      .replace(/catch\s*(\w*)/g, 'catch ($1)')
-      // Fix if-else chains
-      .replace(/;\s*else/g, '} else')
-      .replace(/else\s*if\s*\(/g, '} else if (')
-      // Fix async function declarations
-      .replace(/function\s+async\s+(\w+)/g, 'async function $1')
-      .replace(/async\s+function\s+(\w*)\s*\(/g, 'async function $1 (')
-      // Fix duplicate parens/brackets
-      .replace(/\)\s*\)/g, ')')
-      .replace(/\}\s*\{/g, '} {')
-      // Fix trailing commas in objects/arrays
-      .replace(/,\s*}/g, '}')
-      .replace(/,\s*]/g, ']')
-      // Ensure proper indentation (basic)
-      .replace(/\n\s{4,}/g, '\n    ');
-  }
-
-  function generateBoilerplate(commandName) {
-    return `module.exports.config = {
-  name: "${commandName}",
-  version: "1.0.0",
-  credits: "AutoFixer",
-  hasPermission: 0,
-  description: "Command auto-generated and fixed",
-  commandCategory: "AutoFix",
-  usages: "",
-  cooldowns: 5
-};
-
-module.exports.run = async function({ api, event, args }) {
-  return api.sendMessage("✅ Command \${commandName} has been auto-fixed and is now functional!", event.threadID, event.messageID);
-};
-
-// Add your custom logic here
-`;
-  }
-
-  function fixFile(filePath) {
-    try {
-      let content = fs.readFileSync(filePath, 'utf8').trim();
-      
-      // Skip if empty or non-JS
-      if (!content || !content.includes('module.exports')) {
-        // Backup original
-        const backupPath = filePath + '.backup.js';
-        fs.copySync(filePath, backupPath);
-        
-        // Generate full boilerplate
-        content = generateBoilerplate(path.basename(filePath, '.js'));
-        fs.writeFileSync(filePath, content, 'utf8');
-        console.log(chalk.green(`✅ Generated boilerplate for: ${filePath}`));
-        return;
-      }
-
-      // Apply syntax fixes
-      const fixedContent = fixSyntax(content);
-      
-      // Validate basic structure (try to require it)
-      const tempPath = path.join(__dirname, 'temp_fix.js');
-      fs.writeFileSync(tempPath, fixedContent, 'utf8');
-      
-      try {
-        require(tempPath);
-        fs.writeFileSync(filePath, fixedContent, 'utf8');
-        console.log(chalk.green(`✅ Syntax fixed: ${filePath}`));
-      } catch (validateErr) {
-        console.log(chalk.yellow(`⚠️ Validation failed for ${filePath}: ${validateErr.message}. Keeping original.`));
-      } finally {
-        fs.unlinkSync(tempPath); // Cleanup temp file
-      }
-    } catch (err) {
-      // Severe error: Rename to .error.js
-      const errorPath = filePath + '.error.js';
-      fs.renameSync(filePath, errorPath);
-      console.log(chalk.red(`❌ Severe error in ${filePath}, renamed to ${errorPath}`));
-      console.log(chalk.gray(`Error: ${err.message}`));
-    }
-  }
-
-  function walk(dir) {
-    try {
-      const files = fs.readdirSync(dir, { withFileTypes: true });
-      for (const file of files) {
-        const fullPath = path.join(dir, file.name);
-        if (file.isDirectory()) {
-          walk(fullPath);
-        } else if (file.name.endsWith('.js') && !file.name.endsWith('.error.js') && !file.name.endsWith('.backup.js')) {
-          fixFile(fullPath);
-        }
-      }
-    } catch (err) {
-      console.log(chalk.red(`❌ Error walking directory ${dir}: ${err.message}`));
-    }
-  }
-
-  if (fs.existsSync(commandDir)) {
-    console.log(chalk.blue('🔧 Starting AutoFix for all commands...'));
-    walk(commandDir);
-    console.log(chalk.green('✅ AutoFix completed for all commands.'));
+// Process Error Handlers
+process.on('uncaughtException', error => console.error(chalk.red('Unhandled Exception:'), error));
+process.on('unhandledRejection', (reason, promise) => {
+  if (JSON.stringify(reason).includes("571927962827151")) {
+    console.log(chalk.yellow(`Lỗi khi get dữ liệu mới! Khắc phục: hạn chế reset!!`));
   } else {
-    console.log(chalk.yellow('⚠️ No modules/commands directory found — skipping AutoFix.'));
+    console.error(chalk.red('Unhandled Rejection:'), reason);
   }
-}
+});
 
-// Run AutoFix immediately on startup
-autoFixCommands();
-
-// === GLOBALS SETUP (Enhanced for Better Error Handling) ===
+// GLOBALS SETUP
 const dataDir = './utils/data';
 if (!fs.existsSync(dataDir)) {
   fs.mkdirSync(dataDir, { recursive: true });
-  console.log(chalk.green(`✅ Created data directory: ${dataDir}`));
+  logger.loader(chalk.green(`✅ Created data directory: ${dataDir}`));
 }
 
 global.client = {
@@ -140,17 +33,12 @@ global.client = {
   handleReaction: [],
   handleReply: [],
   mainPath: process.cwd(),
-  getTime: (type) => {
-    try {
-      return moment.tz("Asia/Ho_Chi_Minh").format({
-        fullTime: "HH:mm:ss DD/MM/YYYY",
-        fullHour: "HH:mm:ss",
-        fullDate: "DD/MM/YYYY"
-      }[type] || "HH:mm:ss DD/MM/YYYY");
-    } catch (e) {
-      return new Date().toLocaleString('vi-VN', { timeZone: 'Asia/Ho_Chi_Minh' });
-    }
-  }
+  configPath: path.resolve(__dirname, 'config.json'),
+  timeStart: Date.now(),
+  getTime: (type) => moment.tz("Asia/Ho_Chi_Minh").format({
+    seconds: "ss", minutes: "mm", hours: "HH", day: "dddd", date: "DD", month: "month", year: "month",
+    fullHour: "HH:mm:ss", fullYear: "DD/MM/YYYY", fullTime: "HH:mm:ss DD/MM/YYYY"
+  }[type] || "HH:mm:ss DD/MM/YYYY")
 };
 
 global.data = {
@@ -163,26 +51,72 @@ global.data = {
   threadAllowNSFW: [],
   allUserID: [],
   allCurrenciesID: [],
-  allThreadID: []
+  allThreadID: [],
+  groupInteractionsData: []
 };
 
 global.utils = require('./utils/func');
 global.config = require('./config.json');
 global.configModule = {};
+global.moduleData = [];
 global.language = {};
+global.nodemodule = new Proxy({}, {
+  get: (target, name) => {
+    if (!target[name]) target[name] = require(name);
+    return target[name];
+  }
+});
 
-// === ENHANCED LANGUAGE LOADING ===
+// === ENHANCED MODULE LOADER (DEFINED EARLY) ===
+function loadModules(dir, target, disabledList = []) {
+  if (!fs.existsSync(dir)) return 0;
+  const files = fs.readdirSync(dir, { withFileTypes: true }).filter(f => f.name.endsWith('.js') && !f.name.includes('example') && !disabledList.includes(f.name));
+  let count = 0;
+  let errorCount = 0;
+  for (const file of files) {
+    const filePath = path.join(dir, file.name);
+    try {
+      delete require.cache[require.resolve(filePath)];
+      const mod = require(filePath);
+      const { config, run, onStart, onLoad, handleEvent } = mod;
+      if (!config?.name || (!run && !onStart)) {
+        logger.loader(chalk.yellow(`⚠️ Invalid structure in ${target}: ${file.name}`));
+        continue;
+      }
+      if (global.client[target].has(config.name)) {
+        logger.loader(chalk.yellow(`⚠️ Duplicate ${target}: ${config.name} (${file.name})`));
+        continue;
+      }
+      if (config.envConfig) {
+        global.configModule[config.name] = global.configModule[config.name] || {};
+        Object.assign(global.configModule[config.name], config.envConfig);
+        Object.assign(global.config[config.name], config.envConfig);
+      }
+      // onLoad called later after api/models ready
+      if (handleEvent) global.client.eventRegistered.push(config.name);
+      global.client[target].set(config.name, mod);
+      count++;
+    } catch (e) {
+      errorCount++;
+      logger.loader(chalk.red(`❌ Load error ${target} ${file.name}: ${e.message}`));
+    }
+  }
+  logger.loader(chalk.green(`✅ Total ${target}: ${count} (errors: ${errorCount})`));
+  return count;
+}
+
+// LANGUAGE LOADING
 function loadLanguage() {
   try {
     const lang = global.config.language || 'en';
     const langPath = path.join(__dirname, 'languages', `${lang}.lang`);
     if (!fs.existsSync(langPath)) {
-      console.log(chalk.yellow(`⚠️ Language file not found: ${lang}.lang. Using English defaults.`));
+      logger.loader(chalk.yellow(`⚠️ Language file not found: ${lang}.lang. Using defaults.`));
       return;
     }
 
     const content = fs.readFileSync(langPath, 'utf8');
-    const lines = content.split(/\r?\n/).filter(line => line.trim() && !line.startsWith('#'));
+    const lines = content.split(/\r?\n|\r/).filter(line => line.trim() && !line.startsWith('#'));
 
     for (const line of lines) {
       const [key, ...valParts] = line.split('=');
@@ -195,9 +129,9 @@ function loadLanguage() {
         global.language[head][subKey] = value;
       }
     }
-    console.log(chalk.green(`✅ Loaded language: ${lang}`));
+    logger.loader(chalk.green(`✅ Loaded language: ${lang}`));
   } catch (e) {
-    console.log(chalk.red(`❌ Language load error: ${e.message}`));
+    logger.loader(chalk.red(`❌ Language load error: ${e.message}`), 'error');
   }
 }
 loadLanguage();
@@ -215,7 +149,7 @@ global.getText = (...args) => {
   }
 };
 
-// === UTILITY: COOKIE TO APPSTATE CONVERSION ===
+// UTILITY: COOKIE/APPSTATE
 function parseCookiesToAppState(cookieString) {
   if (!cookieString) return [];
   return cookieString.split(';').map(pair => {
@@ -226,7 +160,7 @@ function parseCookiesToAppState(cookieString) {
   }).filter(Boolean);
 }
 
-async function getCookieFromConsole(prompt = "👉 Paste your Facebook cookie here: ") {
+function getCookieFromConsole(prompt = "👉 Paste your Facebook cookie here: ") {
   const rl = readline.createInterface({ input: process.stdin, output: process.stdout });
   return new Promise(resolve => {
     rl.question(prompt, answer => {
@@ -236,107 +170,233 @@ async function getCookieFromConsole(prompt = "👉 Paste your Facebook cookie he
   });
 }
 
-// === MAIN BOT INITIALIZER ===
-async function initializeBot({ models }) {
-  const fbstatePath = path.join(dataDir, 'fbstate.json');
-  let appState = [];
+// Load AppState
+const appstatePath = path.join(dataDir, 'appstate.json');
+const cookiePath = './cookie.txt';
+let appState = [];
 
-  // Load existing appstate
-  if (fs.existsSync(fbstatePath)) {
-    try {
-      appState = JSON.parse(fs.readFileSync(fbstatePath, 'utf8'));
-      console.log(chalk.green('✅ Loaded existing fbstate.json for login.'));
-    } catch (e) {
-      console.log(chalk.red('❌ Invalid fbstate.json. Will prompt for new cookie.'));
-      appState = [];
-    }
+if (fs.existsSync(appstatePath)) {
+  try {
+    appState = JSON.parse(fs.readFileSync(appstatePath, 'utf8'));
+    logger.loader(chalk.green('✅ Loaded existing appstate.json for login.'));
+  } catch (e) {
+    logger.loader(chalk.red('❌ Invalid appstate.json. Falling back to cookie.'), 'error');
   }
+}
 
-  // Prompt for cookie if needed
-  if (!appState.length) {
+if (!appState.length && fs.existsSync(cookiePath)) {
+  try {
+    const cookie = fs.readFileSync(cookiePath, 'utf8');
+    appState = parseCookiesToAppState(cookie);
+    logger.loader(chalk.green('✅ Loaded from cookie.txt.'));
+  } catch (e) {
+    logger.loader(chalk.red('❌ Invalid cookie.txt.'), 'error');
+  }
+}
+
+if (!appState.length) {
+  (async () => {
     const cookie = await getCookieFromConsole();
     if (!cookie) {
-      console.log(chalk.red('❌ No cookie provided. Exiting.'));
+      logger.loader(chalk.red('❌ No cookie provided. Exiting.'), 'error');
       process.exit(1);
     }
     appState = parseCookiesToAppState(cookie);
-    fs.writeFileSync(fbstatePath, JSON.stringify(appState, null, 2));
-    console.log(chalk.green('✅ Saved new fbstate.json.'));
-  }
+    fs.writeFileSync(cookiePath, cookie);
+    logger.loader(chalk.green('✅ Saved new cookie.txt.'));
+    startBot(appState);
+  })();
+} else {
+  startBot(appState);
+}
 
-  console.log(chalk.yellow('🔄 Logging in with AppState...'));
+// === MAIN BOT INITIALIZER ===
+function startBot(appState) {
+  const handleError = (err) => {
+    logger(JSON.stringify(err, null, 2), chalk.red('[ LOGIN ERROR ] >'), 'error');
+  };
 
-  return new Promise((resolve, reject) => {
-    login({ appState }, (err, api) => {
+  const clearFacebookWarning = (api, callback) => {
+    const form = {
+      av: api.getCurrentUserID(),
+      fb_api_caller_class: "RelayModern",
+      fb_api_req_friendly_name: "FBScrapingWarningMutation",
+      variables: "{}",
+      server_timestamps: "true",
+      doc_id: "6339492849481770",
+    };
+
+    api.httpPost("https://www.facebook.com/api/graphql/", form, (error, res) => {
+      if (error || res.errors) {
+        logger("Tiến hành vượt cảnh báo", 'error');
+        return callback && callback(true);
+      }
+      if (res.data?.fb_scraping_warning_clear?.success) {
+        logger("Đã vượt cảnh cáo Facebook thành công.", chalk.green('[ SUCCESS ] >'));
+        return callback && callback(true);
+      }
+    });
+  };
+
+  login({ appState }, (err, api) => {
+    if (err) return handleError(err);
+
+    // Update appstate
+    const updatedAppState = api.getAppState();
+    fs.writeFileSync(appstatePath, JSON.stringify(updatedAppState, null, 2));
+
+    api.setOptions(global.config.FCAOption || {});
+    global.api = api;
+
+    const userId = api.getCurrentUserID();
+    api.getUserInfo(userId, (err, userInfo) => {
       if (err) {
-        console.log(chalk.red('❌ Login failed:'), err.error || err.message || JSON.stringify(err));
-        console.log(chalk.yellow('💡 Tip: Delete utils/data/fbstate.json and try again.'));
-        reject(err);
+        logger(chalk.red(`❌ Failed to get user info: ${err.message}`), 'error');
         return;
       }
+      const userName = userInfo[userId]?.name || 'Unknown';
+      logger.loader(chalk.green(`✅ Đăng nhập thành công - ${userName} (${userId})`), '[ LOGIN ] >');
+      console.log(chalk.cyan(figlet.textSync('Wolf bot', { horizontalLayout: 'fitted' })) || chalk.yellow(figlet.textSync('NIIO LIMIT', { horizontalLayout: 'full' })));
 
-      // Update appstate with latest from API
-      const updatedAppState = api.getAppState();
-      fs.writeFileSync(fbstatePath, JSON.stringify(updatedAppState, null, 2));
-
-      global.client.api = api;
-      console.log(chalk.green('✅ Login successful!'));
-      console.log(chalk.cyan(figlet.textSync('Wolf Bot', { horizontalLayout: 'fitted' })));
-
-      // === ENHANCED MODULE LOADER ===
-      const loadModules = (dir, target) => {
-        if (!fs.existsSync(dir)) {
-          console.log(chalk.yellow(`⚠️ Directory not found: ${dir}`));
-          return 0;
+      // Memory Monitor
+      const formatMemory = (bytes) => (bytes / (1024 * 1024)).toFixed(2);
+      const logMemoryUsage = () => {
+        const { rss } = process.memoryUsage();
+        logger(`🔹 RAM đang sử dụng (RSS): ${formatMemory(rss)} MB`, chalk.gray('[ Giám sát ]'));
+        if (rss > 800 * 1024 * 1024) {
+          logger('⚠️ Phát hiện rò rỉ bộ nhớ, khởi động lại ứng dụng...', chalk.yellow('[ Giám sát ]'));
+          process.exit(1);
         }
-        const files = fs.readdirSync(dir, { withFileTypes: true });
+      };
+      setInterval(logMemoryUsage, 10000);
+
+      // Auto Clean Cache
+      if (global.config.autoCleanCache?.Enable) {
+        const cachePaths = global.config.autoCleanCache.CachePaths || [];
+        const fileExtensions = (global.config.autoCleanCache.AllowFileExtension || []).map(ext => ext.toLowerCase());
+        const deleteFileOrDirectory = (filePath) => {
+          fs.stat(filePath, (err, stats) => {
+            if (err) return console.error(chalk.red(`[ CLEANER ] Không thể truy cập: ${filePath}`), err);
+            if (stats.isDirectory()) {
+              fs.rm(filePath, { recursive: true, force: true }, (err) => {
+                if (err) console.error(chalk.red(`[ CLEANER ] Lỗi khi xóa thư mục: ${filePath}`), err);
+              });
+            } else if (fileExtensions.includes(path.extname(filePath).toLowerCase())) {
+              fs.unlink(filePath, (err) => {
+                if (err) console.error(chalk.red(`[ CLEANER ] Lỗi khi xóa tệp: ${filePath}`), err);
+              });
+            }
+          });
+        };
+        cachePaths.forEach(folderPath => {
+          if (!fs.existsSync(folderPath)) fs.mkdirSync(folderPath, { recursive: true });
+          fs.readdir(folderPath, (err, files) => {
+            if (err) return console.error(chalk.red(`[ CLEANER ] Lỗi khi đọc thư mục: ${folderPath}`), err);
+            files.forEach(file => deleteFileOrDirectory(path.join(folderPath, file)));
+          });
+        });
+        logger(`Đã xử lý tất cả các đường dẫn trong CachePaths.`, chalk.green('[ CLEANER ]'));
+      } else {
+        logger(`Auto Clean Cache đã bị tắt.`, chalk.yellow('[ CLEANER ]'));
+      }
+
+      // === ENHANCED MODULE LOADER (Shortened Log, AFTER API & MODELS) ===
+      const loadModules = (dir, target, disabledList = []) => {
+        if (!fs.existsSync(dir)) return 0;
+        const files = fs.readdirSync(dir, { withFileTypes: true }).filter(f => f.name.endsWith('.js') && !f.name.includes('example') && !disabledList.includes(f.name));
         let count = 0;
+        let errorCount = 0;
         for (const file of files) {
           const filePath = path.join(dir, file.name);
           try {
-            if (file.isDirectory()) {
-              count += loadModules(filePath, target);
-            } else if (file.name.endsWith('.js') && !file.name.endsWith('.error.js')) {
-              delete require.cache[require.resolve(filePath)]; // Clear cache for hot reload
-              const mod = require(filePath);
-              // More flexible validation: Check for config.name and either run or onStart
-              if (mod.config?.name && (mod.run || mod.onStart || mod.onLoad)) {
-                global.client[target].set(mod.config.name, mod);
-                count++;
-                console.log(chalk.gray(`📦 Loaded ${target.slice(0, -1)}: ${mod.config.name}`));
-              } else {
-                console.log(chalk.yellow(`⚠️ Invalid module structure: ${filePath}`));
-              }
+            delete require.cache[require.resolve(filePath)];
+            const mod = require(filePath);
+            const { config, run, onStart, onLoad, handleEvent } = mod;
+            if (!config?.name || (!run && !onStart)) {
+              logger.loader(chalk.yellow(`⚠️ Invalid structure in ${target}: ${file.name}`));
+              continue;
             }
+            if (global.client[target].has(config.name)) {
+              logger.loader(chalk.yellow(`⚠️ Duplicate ${target}: ${config.name} (${file.name})`));
+              continue;
+            }
+            if (config.envConfig) {
+              global.configModule[config.name] = global.configModule[config.name] || {};
+              Object.assign(global.configModule[config.name], config.envConfig);
+              Object.assign(global.config[config.name], config.envConfig);
+            }
+            // onLoad NOW with api & models
+            if (onLoad) onLoad({ api, models: global.models });
+            if (handleEvent) global.client.eventRegistered.push(config.name);
+            global.client[target].set(config.name, mod);
+            count++;
           } catch (e) {
-            console.log(chalk.red(`❌ Load error for ${filePath}: ${e.message}`));
-            // Optionally auto-fix on load failure, but since we did it at startup, just log
+            errorCount++;
+            logger.loader(chalk.red(`❌ Load error ${target} ${file.name}: ${e.message}`));
           }
         }
+        logger.loader(chalk.green(`✅ Total ${target}: ${count} (errors: ${errorCount})`));
         return count;
       };
 
-      const commands = loadModules(path.join(__dirname, 'modules/commands'), 'commands');
-      const events = loadModules(path.join(__dirname, 'modules/events'), 'events');
-      logger.loader(`Loaded ${commands} commands and ${events} events.`);
+      const commands = loadModules(path.join(__dirname, 'modules/commands'), 'commands', global.config.commandDisabled || []);
+      const events = loadModules(path.join(__dirname, 'modules/events'), 'events', global.config.eventDisabled || []);
+      logger.loader(chalk.green(`Loaded ${commands} commands and ${events} events.`));
+      logger.loader(`Ping load source: ${Date.now() - global.client.timeStart}ms`);
 
-      // === MQTT LISTENER SETUP ===
-      try {
-        const listener = require('./includes/listen')({ api, models });
-        api.listenMqtt((error, event) => {
-          if (error) {
-            logger.error('MQTT Error: ' + JSON.stringify(error));
-            return;
+      // OnLoad Modules
+      const onloadDir = path.join(__dirname, 'modules/onload');
+      if (fs.existsSync(onloadDir)) {
+        fs.readdirSync(onloadDir).filter(module => module.endsWith('.js')).forEach(module => {
+          try {
+            require(path.join(onloadDir, module))({ api, models: global.models });
+          } catch (e) {
+            logger.loader(chalk.red(`❌ OnLoad error for ${module}: ${e.message}`));
           }
-          if (["presence", "typ", "read_receipt"].includes(event.type)) return;
-          listener(event);
         });
-        console.log(chalk.green('[ MQTT ] Connected successfully.'));
-      } catch (e) {
-        console.log(chalk.red('❌ Listener initialization failed:'), e.message);
       }
 
-      resolve(api);
+      // === LISTENER SETUP ===
+      api.listen((error, event) => {
+        if (error) {
+          logger('Lỗi lắng nghe: ' + JSON.stringify(error), 'error');
+          return;
+        }
+
+        const threadID = event.threadID;
+        const senderID = event.senderID;
+        const messageID = event.messageID;
+        const body = event.body || "";
+
+        // Skip bot messages
+        if (senderID === userId) return;
+
+        // Trigger event handlers
+        for (const [name, eventHandler] of global.client.events) {
+          if (eventHandler.handleEvent) eventHandler.handleEvent({ api, event, models: global.models });
+        }
+
+        // Command handling
+        const prefix = global.config.prefix || "!";
+        if (!body.startsWith(prefix)) return;
+
+        const args = body.slice(prefix.length).trim().split(/ +/);
+        const commandName = args.shift().toLowerCase();
+        const command = global.client.commands.get(commandName);
+
+        if (!command) return;
+
+        // Run command with models
+        try {
+          command.run({ api, event, args, models: global.models });
+        } catch (err) {
+          console.error(chalk.red(`[ERROR] Command ${commandName}: ${err.message}`));
+          api.sendMessage(`❌ Lỗi lệnh ${commandName}: ${err.message}`, threadID, messageID);
+        }
+      });
+
+      logger.loader(chalk.green('[ LISTENER ] Connected successfully.'));
+      logger.loader(chalk.green(`🚀 WolfBot started! | Time: ${moment().tz("Asia/Ho_Chi_Minh").format("HH:mm:ss DD/MM/YYYY")}`));
     });
   });
 }
@@ -344,16 +404,19 @@ async function initializeBot({ models }) {
 // === DATABASE CONNECTION & BOT START ===
 (async () => {
   try {
-    console.log(chalk.blue('🗄️ Connecting to database...'));
+    logger.loader(chalk.blue('🗄️ Connecting to database...'));
     const { Sequelize, sequelize } = require("./includes/database");
     await sequelize.authenticate();
     const models = require('./includes/database/model')({ Sequelize, sequelize });
-    console.log(chalk.green('[ DATABASE ] Connected successfully.'));
+    global.models = models;
+    logger.loader(chalk.green(global.getText('mirai', 'successConnectDatabase') || '[ DATABASE ] Connected successfully.'));
 
-    await initializeBot({ models });
+    // Load modules AFTER DB & API (inside login callback)
+    // ... (loadModules called inside login to ensure api & models ready)
+
   } catch (e) {
-    console.log(chalk.red('❌ Database connection failed:'), e.message);
-    console.log(chalk.yellow('💡 Ensure your DB config is correct in config.json.'));
+    logger.loader(chalk.red(`❌ Database connection failed: ${e.message}`), 'error');
+    logger.loader(chalk.yellow('💡 Ensure your DB config is correct in config.json.'));
     process.exit(1);
   }
 })();
