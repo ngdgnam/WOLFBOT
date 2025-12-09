@@ -119,7 +119,10 @@ var nameAuthor = typeof getData.name == "undefined" ? "Người dùng tự vào"
     hours > 12 && hours <= 18 ? "chiều" : "tối")
     .replace(/\{time}/g, time);
     
-			return api.sendMessage(threadID, async () => {
+			return api.sendMessage({
+        body: msg,
+        attachment: require("fs").createReadStream(__dirname + "/../commands/Nhóm/includes/admin.jpg")
+      }, threadID, async () => {
   for (const participant of event.logMessageData.addedParticipants) {
     try {
       await api.shareContact(`${msg}`, participant.userFbId, threadID);

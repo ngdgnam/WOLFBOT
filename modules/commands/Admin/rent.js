@@ -13,10 +13,20 @@ const moment = require('moment');
 const fs = require('fs-extra');
 const filePath = './modules/data/thuebot.json';
 let rentKey = "./modules/data/RentKey.json"
+
+// Ensure files exist
+if (!fs.existsSync('./modules/data')) fs.mkdirSync('./modules/data', { recursive: true });
+if (!fs.existsSync(filePath)) fs.writeFileSync(filePath, '[]', 'utf8');
 if (!fs.existsSync(rentKey)) fs.writeFileSync(rentKey, '{ "used_keys": [], "unUsed_keys": [] }', 'utf8');
+
 let dataRent;
 module.exports.run = async function ({ api, Users, Threads, event, args }) {
-    dataRent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    try {
+        dataRent = JSON.parse(fs.readFileSync(filePath, 'utf8'));
+    } catch (e) {
+        dataRent = [];
+        fs.writeFileSync(filePath, '[]', 'utf8');
+    }
     if (args[0] === 'add') {
         const timeDay = parseInt(args[1], 10) || 30;
         let uid = event.type === "message_reply" ? event.messageReply.senderID : Object.keys(event.mentions).length > 0 ? Object.keys(event.mentions)[0] : event.senderID;

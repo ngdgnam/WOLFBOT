@@ -83,7 +83,10 @@ if (['ADMIN','NO PREFIX'].includes(cmd.cmdCategory.toUpperCase()) && !global.con
             msg += `[ ${cmd.cmdCategory.toUpperCase()} ]\n📝 Tổng lệnh: ${cmd.nameModule.length} lệnh\n${cmd.nameModule.join(", ")}\n\n`;
         });
         msg += `📝 Tổng số lệnh: ${cmds.size} lệnh\n👤 Tổng số admin bot: ${admin.length}\n👾 Tên Bot: ${NameBot}\n🕹️ Phiên bản: ${version}\n⏰ Hôm nay là: ${thu}\n⏱️ Thời gian: ${time}\n${prefix}help + tên lệnh để xem chi tiết\n${prefix}help + all để xem tất cả lệnh`;
-        return api.sendMessage(msg, tid, mid);
+        return api.sendMessage({
+            body: msg,
+            attachment: require("fs").createReadStream(__dirname + "/includes/admin.jpg")
+        }, tid, mid);
     }
 }
 function S(k) {
