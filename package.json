@@ -1,0 +1,76 @@
+{
+  "name": "wolfbot",
+  "version": "3.0.0",
+  "description": "Advanced Facebook Messenger Bot with command system, events, and rental management",
+  "main": "wolfbot.js",
+  "type": "commonjs",
+  "homepage": "https://github.com/ngdgnam/WOLFBOT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ngdgnam/WOLFBOT.git"
+  },
+  "bugs": {
+    "url": "https://github.com/ngdgnam/WOLFBOT/issues"
+  },
+  "author": "ngdgnam",
+  "license": "MIT",
+  "engines": {
+    "node": ">=14.0.0",
+    "npm": ">=6.0.0"
+  },
+  "scripts": {
+    "start": "node wolfbot.js",
+    "dev": "NODE_ENV=development node wolfbot.js",
+    "setup": "bash setup.sh auto",
+    "setup:termux": "bash setup.sh termux",
+    "setup:vps": "bash setup.sh vps",
+    "install:termux": "bash install-termux.sh",
+    "install:vps": "bash install-vps.sh",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "stop": "pkill -f 'node wolfbot.js'",
+    "restart": "npm stop && sleep 2 && npm start"
+  },
+  "keywords": [
+    "facebook",
+    "messenger",
+    "bot",
+    "fca",
+    "command",
+    "event",
+    "nodejs"
+  ],
+  "dependencies": {
+    "@distube/ytdl-core": "^4.16.12",
+    "@dongdev/fca-unofficial": "^3.0.12",
+    "@google/generative-ai": "^0.24.1",
+    "acorn": "^8.15.0",
+    "archiver": "^7.0.1",
+    "axios": "^1.12.2",
+    "canvas": "^3.2.0",
+    "chalk": "^4.1.2",
+    "chess.js": "^1.4.0",
+    "cors": "^2.8.5",
+    "esprima": "^4.0.1",
+    "figlet": "^1.9.3",
+    "fs-extra": "^11.3.2",
+    "glob": "^11.0.3",
+    "got": "^14.5.0",
+    "gtts": "^0.2.1",
+    "image-downloader": "^4.3.0",
+    "imgur": "^2.5.0",
+    "jimp": "^1.6.0",
+    "moment-timezone": "^0.6.0",
+    "node-cron": "^4.2.1",
+    "node-disk-info": "^1.3.0",
+    "node-superfetch": "^0.3.5",
+    "os-utils": "^0.0.14",
+    "pastebin-api": "^7.0.0",
+    "pidusage": "^4.0.1",
+    "request-promise-native": "^1.0.9",
+    "string-similarity": "^4.0.4",
+    "uniqid": "^5.4.0",
+    "weather-js": "^2.0.0",
+    "youtube-search-api": "^2.0.1",
+    "ytdl-core": "^4.11.5"
+  }
+}
