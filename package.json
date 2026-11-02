@@ -7,7 +7,8 @@
   "scripts": {
     "start": "node src/index.js",
     "deploy": "node src/deploy-commands.js",
-    "dev": "node --watch src/index.js"
+    "dev": "node --watch src/index.js",
+    "telegram:chat-id": "node scripts/telegram-chat-id.js"
   },
   "engines": {
     "node": ">=20.0.0"

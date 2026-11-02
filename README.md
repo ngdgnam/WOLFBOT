@@ -111,9 +111,12 @@ Viết lại bằng SQLite theo kiến trúc của bot này (không dùng MongoD
 - `/birthday set|remove|upcoming` — chỉ lưu ngày/tháng (không lưu năm), bot chúc mừng mỗi ngày theo giờ UTC+7.
 Tên kênh gợi ý/sinh nhật chỉnh ở `community` trong `src/config/gzw.js`.
 
-## Webhook: thông báo và nhận chuyển khoản tự động
+## Thông báo (Telegram/Discord) và nhận chuyển khoản tự động
 
-**1) Thông báo vào kênh Discord** — đặt `DISCORD_WEBHOOK_URL` (Cài đặt kênh → Tích hợp → Webhook → Webhook mới → Sao chép URL). Bot dùng nó để báo thanh toán/đơn cần xử lý. URL này là bí mật: ai có URL đều đăng tin được. Thử bằng `/webhook-admin test`.
+**1) Thông báo** — bot báo thanh toán tự động, đơn cần xử lý, tiền vào không khớp đơn nào. Chọn một hoặc cả hai kênh:
+- **Telegram (khuyến nghị nếu không muốn dùng webhook Discord):** tạo bot ở `@BotFather` (`/newbot`) lấy token → đặt `TELEGRAM_BOT_TOKEN`. Nhắn "hi" cho bot (hoặc thêm bot vào nhóm rồi nhắn một tin), chạy `npm run telegram:chat-id` để lấy id → đặt `TELEGRAM_CHAT_ID`.
+- **Discord webhook:** đặt `DISCORD_WEBHOOK_URL` (Cài đặt kênh → Tích hợp → Webhook → Webhook mới → Sao chép URL).
+Token/URL đều là bí mật. Thử bằng `/webhook-admin test`; một kênh lỗi không làm kênh còn lại ngừng gửi.
 
 **2) Tự duyệt chuyển khoản qua [SePay](https://developer.sepay.vn/vi/sepay-webhooks/tich-hop-webhook)** (tuỳ chọn; để trống thì vẫn đối soát tay bằng `/payment-admin confirm`):
 - Trong SePay tạo webhook trỏ tới `https://<tên-miền-của-bạn>/webhook/sepay`, chọn xác thực **HMAC-SHA256** (khuyến nghị) và đặt cùng khoá vào `WEBHOOK_SEPAY_SECRET`; hoặc dùng API Key và đặt `WEBHOOK_SEPAY_APIKEY`.
