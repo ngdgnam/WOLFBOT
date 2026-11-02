@@ -412,4 +412,19 @@ db.exec(`
   );
 `);
 
+// ===== Webhook ngân hàng (SePay): mỗi giao dịch (id của SePay) chỉ được xử lý đúng một lần =====
+db.exec(`
+  CREATE TABLE IF NOT EXISTS webhook_transactions (
+    provider TEXT NOT NULL,
+    txId TEXT NOT NULL,
+    amountVnd INTEGER NOT NULL,
+    content TEXT,
+    orderCode TEXT,
+    outcome TEXT NOT NULL,      -- FULFILLED | REVIEW | UNMATCHED | IGNORED
+    note TEXT,
+    receivedAt INTEGER NOT NULL,
+    PRIMARY KEY (provider, txId)
+  );
+`);
+
 module.exports = db;

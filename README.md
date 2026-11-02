@@ -111,6 +111,18 @@ Viết lại bằng SQLite theo kiến trúc của bot này (không dùng MongoD
 - `/birthday set|remove|upcoming` — chỉ lưu ngày/tháng (không lưu năm), bot chúc mừng mỗi ngày theo giờ UTC+7.
 Tên kênh gợi ý/sinh nhật chỉnh ở `community` trong `src/config/gzw.js`.
 
+## Webhook: thông báo và nhận chuyển khoản tự động
+
+**1) Thông báo vào kênh Discord** — đặt `DISCORD_WEBHOOK_URL` (Cài đặt kênh → Tích hợp → Webhook → Webhook mới → Sao chép URL). Bot dùng nó để báo thanh toán/đơn cần xử lý. URL này là bí mật: ai có URL đều đăng tin được. Thử bằng `/webhook-admin test`.
+
+**2) Tự duyệt chuyển khoản qua [SePay](https://developer.sepay.vn/vi/sepay-webhooks/tich-hop-webhook)** (tuỳ chọn; để trống thì vẫn đối soát tay bằng `/payment-admin confirm`):
+- Trong SePay tạo webhook trỏ tới `https://<tên-miền-của-bạn>/webhook/sepay`, chọn xác thực **HMAC-SHA256** (khuyến nghị) và đặt cùng khoá vào `WEBHOOK_SEPAY_SECRET`; hoặc dùng API Key và đặt `WEBHOOK_SEPAY_APIKEY`.
+- Bot nghe ở `WEBHOOK_PORT` (mặc định 3000). SePay cần URL HTTPS công khai: dùng reverse proxy (Nginx/Caddy) hoặc tunnel (Cloudflare Tunnel, ngrok) trỏ vào cổng đó.
+- Bảo vệ: không có khoá thì server không chạy; kiểm tra chữ ký trên thân gốc, timestamp lệch quá 5 phút bị từ chối, thân tối đa 64KB, so khoá bằng so sánh thời gian không đổi.
+- Chống cộng trùng: mỗi `id` giao dịch của SePay chỉ xử lý một lần (bảng `webhook_transactions`), và coin còn được khoá thêm bằng mã đơn trong sổ cái.
+- Chỉ **tự cộng coin** khi: tiền vào, đúng số tài khoản, tìm thấy mã đơn `GZWxxxxxxxx` trong nội dung, đơn còn PENDING **và còn hạn**, số tiền **khớp tuyệt đối**. Mọi trường hợp khác (sai tiền, đơn hết hạn, không có mã đơn) **không cộng coin**, chỉ ghi lại và báo admin xử lý tay.
+- `/webhook-admin status` xem cấu hình (không hiện khoá).
+
 ## Ghi chú quan trọng
 
 Bot này **không** và **sẽ không** bao gồm chức năng phát/stream phim, video có bản quyền trong kênh voice — vì đây là hành vi vi phạm bản quyền ở quy mô lớn. Module nhạc chỉ nên dùng với nội dung audio hợp pháp.

@@ -1,6 +1,7 @@
 const { ActivityType } = require('discord.js');
 const { abortStaleMatches } = require('../database/games');
 const giveaways = require('../services/giveaways');
+const { startWebhookServer } = require('../services/webhookServer');
 const { startBirthdayScheduler } = require('../services/birthdays');
 
 module.exports = {
@@ -10,6 +11,7 @@ module.exports = {
     console.log(`✅ Bot đã đăng nhập thành công: ${client.user.tag}`);
     const aborted = abortStaleMatches();
     if (aborted) console.log(`ℹ️  Đã huỷ ${aborted} trận dang dở từ lần chạy trước (không thưởng).`);
+    startWebhookServer(client);
     giveaways.startScheduler(client);
     startBirthdayScheduler(client);
     client.user.setPresence({
